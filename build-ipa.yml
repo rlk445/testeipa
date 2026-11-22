@@ -1,0 +1,54 @@
+name: Build IPA
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # macos-14 foi aposentado pelo GitHub em 02/11/2026; macos-latest (macos-26) é o rótulo suportado
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copiar o jogo para dentro do app (roda só no iPhone, sem PC)
+        run: |
+          rm -rf ios/www && mkdir -p ios/www
+          rsync -a \
+            --exclude '/ios' --exclude '/.github' --exclude '/.git' \
+            --exclude '/phone' --exclude '/pad' --exclude '/Nueva carpeta' \
+            --exclude '/server.js' --exclude '/js/server.js' --exclude '/js/navegador-server.js' \
+            --exclude '/iniciar.bat' --exclude '/iniciar.command' --exclude '/liberar-firewall.bat' \
+            --exclude '/*.txt' --exclude '/*.ipa' --exclude '/.gitignore' --exclude '/.htaccess' \
+            ./ ios/www/
+          # confere o essencial antes de gastar tempo compilando
+          for f in index.html js/main.js js/core.js vendor/three.min.js vendor/cannon.min.js \
+                   vendor/mediapipe/hands.js vendor/mediapipe/hand_landmark_full.tflite; do
+            test -f "ios/www/$f" || { echo "FALTA ios/www/$f"; exit 1; }
+          done
+          echo "Arquivos do jogo no app:"; du -sh ios/www; ls ios/www
+
+      - name: Instalar XcodeGen
+        run: brew install xcodegen
+
+      - name: Gerar o projeto Xcode
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Compilar (sem assinatura)
+        working-directory: ios
+        run: |
+          xcodebuild -project VRProto.xcodeproj -scheme VRProto -configuration Release -sdk iphoneos \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" clean build
+
+      - name: Empacotar o IPA
+        run: |
+          mkdir -p out/Payload
+          cp -R ios/build/Build/Products/Release-iphoneos/VRProto.app out/Payload/
+          cd out && zip -qry ../SKZ-VR.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SKZ-VR-ipa
+          path: SKZ-VR.ipa
