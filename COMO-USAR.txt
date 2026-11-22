@@ -1,0 +1,47 @@
+SKZ VR — RODA SÓ NO IPHONE, SEM PC (igual ao "pasteo")
+=====================================================
+
+Como funciona
+  - O jogo inteiro (3D, física, casa, bairro, mercado, bichos, MediaPipe das mãos) está DENTRO do app SKZ VR.
+  - O app abre o jogo num servidor local que roda no próprio iPhone. Não usa PC, Wi-Fi nem internet.
+    (Só o YouTube/links dentro do VR precisam de internet.)
+  - Câmera, giroscópio e som são os do próprio iPhone.
+
+O que tem nesta pasta
+  index.html, js/, vendor/, ... .... o jogo (vira o conteúdo do app)
+  ios/, .github/ .................... projeto do app e receita para gerar o IPA no GitHub
+  LEIAME.txt ........................ histórico do jogo (menus, rastreamento etc.)
+  server.js, iniciar.bat, phone/, pad/ ... restos do antigo "modo PC". O IPA novo NÃO usa nada disso
+                                          (pode apagar, ou deixar aí: são ignorados).
+
+
+PARTE 1 — GERAR O IPA (uma vez, e toda vez que você mudar o jogo)
+  1. Suba TODO o conteúdo desta pasta para o repositório no GitHub (inclusive a pasta .github).
+  2. No GitHub: Actions > Build IPA > Run workflow. Espere terminar (alguns minutos).
+  3. Baixe o artefato SKZ-VR-ipa (dentro vem o SKZ-VR.ipa) e instale no iPhone com o Sideloadly, como você já fazia.
+  Obs.: o app novo substitui o "SKZ VR" que já estiver instalado.
+  Obs.: o workflow copia o jogo para dentro do app sozinho. Mexeu em js/, index.html...? Suba de novo e rode o Build IPA.
+
+PARTE 2 — USAR
+  1. Abra o app SKZ VR, deixe o iPhone na horizontal.
+  2. Aceite Câmera e Movimento e orientação quando o iOS perguntar (só na primeira vez).
+  3. Toque em Iniciar. Ligue o Modo VR em "Ajustes rápidos" antes de colocar o celular no óculos.
+  4. Aponte com a mão e junte polegar + indicador (pinça) para clicar.
+  Fone Bluetooth: conecte no iPhone (Ajustes > Bluetooth) antes de abrir o app.
+  Controle Bluetooth: pareie no iPhone e configure em Ajustes > Controles dentro do jogo.
+
+SE ALGO DER ERRADO
+  Build IPA falhou no GitHub: abra a execução em Actions e veja o passo que ficou vermelho.
+     "FALTA ios/www/..." = faltou subir algum arquivo do jogo (confira vendor/mediapipe/).
+  Tela preta / "Pasta www não encontrada no app": o IPA foi gerado sem o passo de copiar o jogo. Rode o Build IPA de novo.
+  Sem som: toque uma vez na tela. Se usa fone Bluetooth, ele precisa estar conectado ANTES de abrir o app.
+  Mãos não aparecem: a câmera traseira precisa ver suas mãos (30 a 50 cm, boa luz). Em Ajustes > Rastreamento
+     dá para mudar Precisão e Sensibilidade. Se estiver pesado: Resolução "Baixa" e Precisão "Rápida".
+  O jogo é pesado (casa + bairro): se o FPS cair, use Resolução "Baixa" em Ajustes.
+
+LIMITES DESTA VERSÃO
+  - Sem PC não existe o "controle com 2º celular" (Galaxy A14, pasta pad/): ele dependia do servidor do PC.
+    Use controle Bluetooth no iPhone ou as mãos.
+  - Vibração não existe no iPhone.
+  - Não foi possível testar num iPhone de verdade antes de gerar este pacote. Se algo falhar, anote a mensagem
+    que aparece na tela (ou o que ficou vermelho no GitHub Actions).
